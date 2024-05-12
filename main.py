@@ -2,17 +2,11 @@ import flet as ft
 import src
 
 def main(page):
-	page.title = "WiseText 2"
+	page.title = "WiseText"
 	page.theme_mode = "dark"
-	page.scroll = True
-	page.add(
-		ft.Row(
-			[
-				src.MenuFiles()
-			],
-			alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-		)
-	)
-	page.add(src.WiseText())
+	page.dark_theme = ft.theme.Theme(color_scheme_seed=ft.colors.GREEN)
+
+	page.add(src.WiseText(page))
+	page.update()
 
 ft.app(main)
