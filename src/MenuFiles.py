@@ -8,6 +8,7 @@ from flet import (
 	)
 import src
 import aiofiles
+import asyncio
 
 class MenuFiles(UserControl):
 	def __init__(self, page, tabs_menu):
@@ -19,33 +20,28 @@ class MenuFiles(UserControl):
 		self.page.on_keyboard_event = self.on_keyboard
 
 	async def close_tab_clicked(self, e: ControlEvent):
-		# selected_tab_index = self.tabs_menu.selected_index - 1
-		# # if len(self.tabs_menu.tabs) == 0:
-		# if selected_tab_index == 0:
-		# 	del self.tabs_menu.tabs[selected_tab_index]
-		# 	self.tabs_menu.update()
-
-		# 	if len(self.tabs_menu.tabs) == 0:
-		# 		self.tabs_menu.selected_index = -1
-		# 	elif self.tabs_menu.selected_index >= len(self.tabs_menu.tabs):
-		# 		self.tabs_menu.selected_index = len(self.tabs_menu.tabs) - 1
-
-		# 	self.tabs_menu.update()
-
-		if len(self.tabs_menu.tabs) >= 0:
-			del self.tabs_menu.tabs[self.tabs_menu.selected_index-1]
-		self.tabs_menu.update()
+		if len(self.tabs_menu.tabs) > 0:
+			selected_tab_index = self.tabs_menu.selected_index
+			del self.tabs_menu.tabs[selected_tab_index]
+			if len(self.tabs_menu.tabs) == 0:
+				self.tabs_menu.selected_index = -1
+			elif selected_tab_index >= len(self.tabs_menu.tabs):
+				self.tabs_menu.selected_index = len(self.tabs_menu.tabs) - 1
+			else:
+				self.tabs_menu.selected_index = selected_tab_index
+			self.tabs_menu.update()
+			await self.page.update_async()
 
 
-	async def new_clicked(self, e: ControlEvent):
-		print(self.tabs_menu.selected_index)
+	async def new_clicked(self, e):
 		new_tab_content = src.FieldText()
-		new_tab_content.value='Hello, World!'
+		new_tab_content.value='W'
 		new_tab = ft.Tab(content=new_tab_content, tab_content = ft.Row([ ft.Text(f"Untitled"), ft.IconButton(icon=ft.icons.CLOSE, tooltip="Close tab", on_click=self.close_tab_clicked) ]))
 
+		self.tabs_menu.selected_index = len(self.tabs_menu.tabs)
 		self.tabs_menu.tabs.append(new_tab)
 		self.tabs_menu.update()
-		print(self.tabs_menu.selected_index)
+		self.page.update()
 
 	async def open_clicked(self, e: ControlEvent):
 		file_picker = ft.FilePicker(on_result=self.open_file_result)
@@ -58,16 +54,13 @@ class MenuFiles(UserControl):
 
 	async def open_file_result(self, e: ft.FilePickerResultEvent):
 		file_path = e.files[0].path
-
-		self.file_name = e.files[0].name
-		self.current_file_path = file_path
-		self.page.title = self.file_name + self.title_suffix
-
+		file_name = e.files[0].name
+		
 		async with aiofiles.open(file_path, mode='r') as file:
 			cont = await file.read()
 			tab_content_file_content = src.FieldText()
 			tab_content_file_content.value = cont
-			new_tab = ft.Tab(content=tab_content_file_content, tab_content = ft.Row([ ft.Text(self.file_name), ft.IconButton(icon=ft.icons.CLOSE, tooltip="Close tab", on_click=self.close_tab_clicked) ]))
+			new_tab = ft.Tab(content=tab_content_file_content, tab_content = ft.Row([ ft.Text(file_path), ft.IconButton(icon=ft.icons.CLOSE, tooltip="Close tab", on_click=self.close_tab_clicked) ]))
 			
 			self.tabs_menu.tabs.append(new_tab)
 			self.tabs_menu.update()
@@ -97,8 +90,17 @@ class MenuFiles(UserControl):
 
 			async with aiofiles.open(file_path, mode='w') as file:
 				content = await file.write(file_content)
+				await file.close()
 
-				# self.current_file_path = file_path
+			async with aiofiles.open(file_path, mode='r') as file:
+				cont = await file.read()
+				tab_content_file_content = src.FieldText()
+				tab_content_file_content.value = cont
+				new_tab = ft.Tab(content=tab_content_file_content, tab_content=ft.Row([ft.Text(file_path), ft.IconButton( icon=ft.icons.CLOSE, tooltip="Close tab", on_click=self.close_tab_clicked)]))
+
+				self.tabs_menu.tabs.append(new_tab)
+				self.tabs_menu.update()
+
 		self.page.update()
 
 
@@ -179,7 +181,7 @@ class MenuFiles(UserControl):
 									),
 								]
 							  )
-		
+
 		return ft.Row(
 			[
 				self.menubar,
