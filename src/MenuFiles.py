@@ -19,24 +19,33 @@ class MenuFiles(UserControl):
 		self.page.on_keyboard_event = self.on_keyboard
 
 	async def close_tab_clicked(self, e: ControlEvent):
+		# selected_tab_index = self.tabs_menu.selected_index - 1
+		# # if len(self.tabs_menu.tabs) == 0:
+		# if selected_tab_index == 0:
+		# 	del self.tabs_menu.tabs[selected_tab_index]
+		# 	self.tabs_menu.update()
+
+		# 	if len(self.tabs_menu.tabs) == 0:
+		# 		self.tabs_menu.selected_index = -1
+		# 	elif self.tabs_menu.selected_index >= len(self.tabs_menu.tabs):
+		# 		self.tabs_menu.selected_index = len(self.tabs_menu.tabs) - 1
+
+		# 	self.tabs_menu.update()
+
 		if len(self.tabs_menu.tabs) >= 0:
-			del self.tabs_menu.tabs[self.tabs_menu.selected_index]
-			self.tabs_menu.update()
+			del self.tabs_menu.tabs[self.tabs_menu.selected_index-1]
+		self.tabs_menu.update()
 
-			if len(self.tabs_menu.tabs) == 0:
-				self.tabs_menu.selected_index = -1
-			elif self.tabs_menu.selected_index >= len(self.tabs_menu.tabs):
-				self.tabs_menu.selected_index = len(self.tabs_menu.tabs) - 1
-
-			self.tabs_menu.update()
 
 	async def new_clicked(self, e: ControlEvent):
+		print(self.tabs_menu.selected_index)
 		new_tab_content = src.FieldText()
 		new_tab_content.value='Hello, World!'
 		new_tab = ft.Tab(content=new_tab_content, tab_content = ft.Row([ ft.Text(f"Untitled"), ft.IconButton(icon=ft.icons.CLOSE, tooltip="Close tab", on_click=self.close_tab_clicked) ]))
 
 		self.tabs_menu.tabs.append(new_tab)
 		self.tabs_menu.update()
+		print(self.tabs_menu.selected_index)
 
 	async def open_clicked(self, e: ControlEvent):
 		file_picker = ft.FilePicker(on_result=self.open_file_result)
@@ -69,7 +78,29 @@ class MenuFiles(UserControl):
 		pass
 
 	async def save_as_clicked(self, e: ControlEvent):
-		pass
+		file_picker = ft.FilePicker(on_result=self.save_as_result)
+		self.page.overlay.append(file_picker)
+		self.page.update()
+
+		file_picker.save_file(
+			file_name='newfile',
+			dialog_title='Save As'
+    	)
+
+	async def save_as_result(self, e: ft.FilePickerResultEvent):
+		if e.path:
+			file_path = e.path
+			selected_tab_index = self.tabs_menu.selected_index - 1
+			selected_tab = self.tabs_menu.tabs[selected_tab_index]
+			tab_content = selected_tab.content
+			file_content = tab_content.value
+
+			async with aiofiles.open(file_path, mode='w') as file:
+				content = await file.write(file_content)
+
+				# self.current_file_path = file_path
+		self.page.update()
+
 
 	async def on_keyboard(self, e: ft.KeyboardEvent):
 		if e.ctrl and e.key == 'N':
