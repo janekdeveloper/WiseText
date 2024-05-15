@@ -9,9 +9,7 @@ from flet import (
 import src
 
 
-md1 = f'''```py
-{ft.TextField(multiline = True, border=ft.InputBorder.NONE)}
-'''
+
 class FieldText(TextField):
 	def __init__(self):
 		super().__init__()

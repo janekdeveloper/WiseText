@@ -11,8 +11,8 @@ from flet import (
 class TabsMenu(Tabs):
 	def __init__(self):
 		super().__init__()
-		# self.page = page
 		self.selected_index=1
 		self.animation_duration=300
-		self.expand=1
+		# self.expand=1
+		self.scrollable = True
 		self.tabs=[]
