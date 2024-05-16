@@ -2,7 +2,7 @@
 Small Text editor written in python
 
 # Goals:
-- [ ] MarkDown support
+- [ ] MarkDown support(In process)
 - [ ] Excel spreadsheet support
 - [ ] Image viewing support
-- [ ] Code highlighting
+- [ ] Code highlighting(In process)
