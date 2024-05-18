@@ -15,17 +15,6 @@ class WiseText(UserControl):
 		self.page = page
 		self.tabs_menu = tabs_menu
 
-	# def save_text(self, e: ControlEvent) -> None:
-	#     with open('save.txt', 'w') as f:
-	#         f.write(self.textfield.value)
-
-	# def read_text(self) -> str | None:
-	#     try:
-	#         with open('save.txt', 'r') as f:
-	#             return f.read()
-	#     except FileNotFoundError:
-	#         self.textfield.hint_text = 'Hello, World!'
-
 	def build(self):
 
 		self.page.padding=ft.padding.all(0)
